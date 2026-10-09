@@ -1,0 +1,19 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S cpp -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build -j2
+      - run: ctest --test-dir build --output-on-failure
+      - run: build/feed_producer --benchmark --count 100000
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: cd python && python -m unittest discover -s tests -v
+        env: {PYTHONPATH: '.'}
